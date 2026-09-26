@@ -8,7 +8,7 @@ tags:
   - water use
 authors:
   - name: Lawrence Oladeji
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0003-0252-3174
     affiliation: 1
 affiliations:
   - name: University of Ibadan, Ibadan, Nigeria
