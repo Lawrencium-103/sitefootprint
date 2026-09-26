@@ -7,11 +7,11 @@ tags:
   - data centres
   - water use
 authors:
-  - name: Adeyori Adekunle
+  - name: Lawrence Oladeji
     orcid: 0000-0000-0000-0000
     affiliation: 1
 affiliations:
-  - name: Alabama A&M University, Huntsville, Alabama, USA
+  - name: University of Ibadan, Ibadan, Nigeria
     index: 1
 date: 26 September 2026
 bibliography: paper.bib

@@ -51,14 +51,16 @@ def fetch_weather(lat, lon, years, timeout=45, retries=3):
             t = np.array(h["temperature_2m"], dtype=float)
             rh = np.array(h["relative_humidity_2m"], dtype=float)
             yrs = np.array([int(s[:4]) for s in h["time"]])
+            months = np.array([int(s[5:7]) for s in h["time"]])
             keep = np.isin(yrs, years)
-            t, rh = t[keep], rh[keep]
+            t, rh, months = t[keep], rh[keep], months[keep]
             # linear interpolation over any gaps
             for a in (t, rh):
                 bad = np.isnan(a)
                 if bad.any():
                     a[bad] = np.interp(np.flatnonzero(bad), np.flatnonzero(~bad), a[~bad])
-            return {"t_db": t, "rh": rh, "n_hours": int(len(t)), "source": "Open-Meteo historical archive (ERA5-based)"}
+            return {"t_db": t, "rh": rh, "month": months, "n_hours": int(len(t)),
+                    "source": "Open-Meteo historical archive (ERA5-based)"}
         except Exception as e:  # network or rate limit
             last = e
             time.sleep(1.5 * (attempt + 1))

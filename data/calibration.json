@@ -1,0 +1,111 @@
+{
+ "source": "Accompanying study, Supplementary Table S4 (Google TTM PUE 2021-2025; model at calibrated parameters)",
+ "fit_mae": 0.015,
+ "fit_n": 34,
+ "holdout_mae": 0.01,
+ "holdout_n": 33,
+ "prior_holdout_mae": 0.014,
+ "spearman": 0.82,
+ "campuses": [
+  {
+   "campus": "Changhua County, Taiwan",
+   "split": "fit",
+   "reported": 1.124,
+   "modelled": 1.1272
+  },
+  {
+   "campus": "Council Bluffs, Iowa",
+   "split": "fit",
+   "reported": 1.114,
+   "modelled": 1.0904
+  },
+  {
+   "campus": "Douglas County, Georgia",
+   "split": "holdout",
+   "reported": 1.09,
+   "modelled": 1.0976
+  },
+  {
+   "campus": "Dublin, Ireland",
+   "split": "holdout",
+   "reported": 1.084,
+   "modelled": 1.0802
+  },
+  {
+   "campus": "Eemshaven, Netherlands",
+   "split": "holdout",
+   "reported": 1.076,
+   "modelled": 1.0805
+  },
+  {
+   "campus": "Fredericia, Denmark",
+   "split": "holdout",
+   "reported": 1.09,
+   "modelled": 1.0805
+  },
+  {
+   "campus": "Henderson, Nevada",
+   "split": "holdout",
+   "reported": 1.0925,
+   "modelled": 1.0824
+  },
+  {
+   "campus": "Loudoun County, Virginia",
+   "split": "fit",
+   "reported": 1.088,
+   "modelled": 1.092
+  },
+  {
+   "campus": "Mayes County, Oklahoma",
+   "split": "holdout",
+   "reported": 1.106,
+   "modelled": 1.1005
+  },
+  {
+   "campus": "Midlothian, Texas",
+   "split": "fit",
+   "reported": 1.1225,
+   "modelled": 1.1078
+  },
+  {
+   "campus": "Quilicura, Chile",
+   "split": "fit",
+   "reported": 1.088,
+   "modelled": 1.079
+  },
+  {
+   "campus": "Singapore",
+   "split": "fit",
+   "reported": 1.128,
+   "modelled": 1.1659
+  },
+  {
+   "campus": "St. Ghislain, Belgium",
+   "split": "fit",
+   "reported": 1.084,
+   "modelled": 1.0806
+  },
+  {
+   "campus": "The Dalles, Oregon",
+   "split": "holdout",
+   "reported": 1.102,
+   "modelled": 1.081
+  }
+ ],
+ "llama": {
+  "flop": 3.8e+25,
+  "gpu_hours_reported": 30840000.0,
+  "gpu_hours_pred": [
+   23900000.0,
+   29400000.0,
+   36300000.0
+  ],
+  "co2_reported_t": 8930,
+  "co2_meta_boundary_t": 9172,
+  "co2_full_boundary_t": [
+   10087,
+   13112,
+   17725
+  ]
+ }
+}

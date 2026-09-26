@@ -5,10 +5,11 @@ version: 0.1.0
 date-released: 2026-09-26
 license: MIT
 authors:
-  - family-names: Adekunle
-    given-names: Adeyori
-    affiliation: "Alabama A&M University"
+  - family-names: Oladeji
+    given-names: Lawrence
+    email: oladeji.lawrence@gmail.com
+    affiliation: "University of Ibadan"
     orcid: "https://orcid.org/0000-0000-0000-0000"
-repository-code: "https://github.com/[user]/sitefootprint"
+repository-code: "https://github.com/Lawrencium-103/sitefootprint"
 doi: "10.5281/zenodo.[to-be-assigned]"
 keywords: [carbon footprint, artificial intelligence, data centres, PUE, water use]

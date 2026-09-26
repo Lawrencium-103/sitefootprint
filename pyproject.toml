@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Location-resolved carbon and water footprints of AI training, with hourly climate-driven cooling and calibrated uncertainty"
 readme = "README.md"
 license = {text = "MIT"}
-authors = [{name = "Adeyori Adekunle"}]
+authors = [{name = "Lawrence Oladeji", email = "oladeji.lawrence@gmail.com"}]
 requires-python = ">=3.9"
 dependencies = ["numpy>=1.24"]
 keywords = ["carbon footprint", "AI", "data centres", "PUE", "WUE", "machine learning", "sustainability"]

@@ -1,7 +1,7 @@
 """
 Default parameters of the SiteFootprint model.
 
-Every value is taken from the accompanying study (Adekunle et al., in review), where
+Every value is taken from the accompanying study (in review), where
 the facility model was calibrated against published PUE of 7 Google campuses and tested
 on 7 hold-out campuses (hold-out MAE 0.010), and the IT-energy model was validated
 against Meta's disclosed Llama 3.1 405B training (-5% on H100-hours).

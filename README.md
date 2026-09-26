@@ -69,9 +69,20 @@ All defaults and their sources are in `sitefootprint/params.py`.
 
 ## Web app (Vercel)
 
-The repository deploys as-is:
+The repository deploys as-is. The web app has eight pages:
 
-- `index.html` is a static front end.
+- **Overview:** configure a run; see key numbers, a log-scale comparison and plain-language findings.
+- **Atlas:** world map of grid carbon intensity, 2010–2025, with click-to-add countries.
+- **Compare:** grid-versus-climate decomposition and a pairwise probability matrix.
+- **Climate & cooling:** monthly PUE, wet-bulb temperature and water, plus a comparison of the three cooling designs.
+- **Uncertainty:** distributions, intervals and every assumption with its source.
+- **Scenario lab:** instant what-ifs for grid decarbonisation, diesel, utilisation and cooling design.
+- **Methods & validation:** equations, calibration against real campuses, and the Llama 3.1 check.
+- **Cite & export:** BibTeX and APA, an auto-written methods paragraph for the exact run, CSV/JSON downloads, SVG/PNG figures, a printable report and share links.
+
+Files:
+
+- `index.html` with `assets/` (no build step, no JavaScript dependencies) is the static front end; `data/` holds the bundled map and calibration data.
 - `api/footprint.py` is a Python serverless function (NumPy only).
 - `vercel.json` bundles the package into the function and allows up to 60 s per request.
 
@@ -94,9 +105,11 @@ API:
 
 ## Citing
 
-Please cite the software (see `CITATION.cff`) and the accompanying study:
+Please cite the software:
 
-Adekunle A. Siting large AI training runs: a calibrated, hour-resolved assessment of how grid, climate and cooling shape carbon and water footprints across six global locations. (in review)
+Oladeji L. SiteFootprint: location-resolved carbon and water footprints of AI training. Version 0.1.0. https://github.com/Lawrencium-103/sitefootprint
+
+and the accompanying study: *Siting large AI training runs: a calibrated, hour-resolved assessment of how grid, climate and cooling shape carbon and water footprints across six global locations* (in review).
 
 ## Data licences
 

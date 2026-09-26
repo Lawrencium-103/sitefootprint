@@ -105,3 +105,17 @@ def test_input_validation():
 def test_all_parameter_ranges_are_ordered():
     for k, (lo, mode, hi, *_rest) in PARAMS.items():
         assert lo <= mode <= hi, k
+
+
+def test_rich_outputs_for_web_app():
+    r = estimate(["Oslo", "Lagos", "Marrakech"], flop=1e25, weather=W, n_draws=120)
+    s = r["sites"][1]
+    assert len(s["monthly"]["pue"]) == 12 and all(v is not None for v in s["monthly"]["pue"])
+    assert set(s["architectures"]) == {"evaporative", "dry", "dtc_dry"}
+    assert s["architectures"]["dry"]["water_m3"] == 0
+    assert sum(s["co2_hist"]) == 120
+    m = r["pairwise_prob_lower"]["matrix"]
+    assert m[0][1] == 1.0 and m[1][0] == 0.0 and m[0][0] is None
+    # central CO2 reproduces E_IT x PUE x CI
+    c = s["central"]
+    assert c["co2_t"] == pytest.approx(r["central"]["it_energy_kwh"] * c["pue"] * c["ci_eff_kg_per_kwh"] / 1000)

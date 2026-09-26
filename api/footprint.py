@@ -50,6 +50,13 @@ class handler(BaseHTTPRequestHandler):
         q = parse_qs(urlparse(self.path).query)
         if "countries" in q:
             return self._send(200, {"countries": countries()})
+        if "params" in q:
+            from sitefootprint.params import PARAMS, CONST, F_PEAK_FLOPS, VALIDITY_NOTE
+            from sitefootprint import __version__
+            return self._send(200, {"version": __version__, "peak_flops": F_PEAK_FLOPS, "constants": CONST,
+                                    "validity_note": VALIDITY_NOTE,
+                                    "params": [{"key": k, "min": v[0], "mode": v[1], "max": v[2], "unit": v[3],
+                                                "source": v[4]} for k, v in PARAMS.items()]})
         return self._send(200, {"references": {k: {"lat": v[0], "lon": v[1], "country": v[2]}
                                                for k, v in REFERENCE_SITES.items()}})
 
