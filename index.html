@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SiteFootprint: carbon and water of AI training by location</title>
+<meta name="description" content="Estimate the carbon and on-site water footprint of an AI training run at any location, with hourly climate-resolved cooling, calibrated PUE and uncertainty.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F7F6; --panel:#FFFFFF; --ink:#17252E; --muted:#5B6B73; --rule:#D5DDDA;
+  --clean:#1F7A6E; --mid:#B8791B; --dirty:#9A3B26; --water:#2F6DA3; --focus:#2F6DA3;
+  --serif:"Newsreader", Georgia, "Times New Roman", serif;
+  --sans:"Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+a{color:var(--water)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;border-bottom:1px solid var(--rule);padding-bottom:18px;margin-bottom:26px}
+h1{font:600 34px/1.1 var(--serif);margin:0;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);max-width:60ch}
+.grid{display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start}
+.grid>*{min-width:0}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+form{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:20px;position:sticky;top:calc(16px + env(safe-area-inset-top,0px))}
+@media (max-width:900px){form{position:static}}
+fieldset{border:0;margin:0 0 18px;padding:0}
+legend{font:600 17px/1.3 var(--serif);margin-bottom:8px;padding:0}
+label{display:block;font-size:13px;color:var(--muted);margin:8px 0 3px}
+input,select{width:100%;font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink)}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.seg{display:flex;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.seg label{flex:1;margin:0;text-align:center;padding:7px 4px;cursor:pointer;font-size:13px;color:var(--ink);background:#fff;border-right:1px solid var(--rule)}
+.seg label:last-child{border-right:0}
+.seg input{position:absolute;opacity:0;width:1px;height:1px}
+.seg input:checked+span{font-weight:600}
+.seg label:has(input:checked){background:#E8EFEC}
+.seg label:has(input:focus-visible){outline:2px solid var(--focus);outline-offset:-2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--rule);background:#fff;border-radius:999px;padding:4px 11px;cursor:pointer;color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.loclist{list-style:none;margin:10px 0 0;padding:0}
+.loclist li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--rule);font-size:14px}
+.loclist small{color:var(--muted)}
+.loclist button{font:inherit;font-size:12px;border:0;background:none;color:var(--dirty);cursor:pointer}
+details{margin-top:8px}
+summary{cursor:pointer;font-size:13px;color:var(--water)}
+.add{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.add .full{grid-column:1/-1}
+.btn{font:600 15px var(--sans);width:100%;padding:11px;border:0;border-radius:4px;background:var(--ink);color:#fff;cursor:pointer;margin-top:4px}
+.btn:disabled{opacity:.55;cursor:progress}
+.btn2{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--rule);background:#fff;border-radius:4px;cursor:pointer;color:var(--ink)}
+.hint{font-size:12px;color:var(--muted);margin:4px 0 0}
+.out{min-height:420px}
+.empty{border:1px dashed var(--rule);border-radius:6px;padding:40px 28px;color:var(--muted)}
+.empty h2{font:600 22px var(--serif);color:var(--ink);margin:0 0 8px}
+.err{background:#FBEDEA;border-left:3px solid var(--dirty);padding:10px 14px;margin-bottom:16px}
+.summary{font:500 22px/1.35 var(--serif);margin:0 0 6px;max-width:62ch}
+.sub{color:var(--muted);margin:0 0 18px;font-size:14px}
+.ruler{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:14px 16px 8px;margin-bottom:22px}
+.ruler h3,.tbl h3{font:600 17px var(--serif);margin:0 0 2px}
+.ruler p{margin:0 0 6px;color:var(--muted);font-size:13px}
+.ruler svg{width:100%;height:auto;display:block}
+.tbl{overflow-x:auto;background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:14px 16px;margin-bottom:22px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--rule);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--muted);font-size:12.5px}
+tbody tr:last-child td{border-bottom:0}
+.note{font-size:13px;color:var(--muted);max-width:75ch}
+.cite{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:14px 16px}
+.cite pre{white-space:pre-wrap;font-size:12px;background:var(--bg);padding:10px;border-radius:4px;margin:8px 0 0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}
+footer{margin-top:40px;border-top:1px solid var(--rule);padding-top:14px;font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.fade{animation:f .35s ease-out}@keyframes f{from{opacity:0}to{opacity:1}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>SiteFootprint</h1>
+  <p>Carbon and water of an AI training run, wherever you train it. Hourly weather, calibrated cooling physics and paired uncertainty.</p>
+</header>
+
+<div class="grid">
+<form id="f" novalidate>
+  <fieldset>
+    <legend>Training run</legend>
+    <div class="seg" role="radiogroup" aria-label="Workload input">
+      <label><input type="radio" name="mode" value="flop" checked><span>Compute (FLOP)</span></label>
+      <label><input type="radio" name="mode" value="gpuh"><span>GPU-hours</span></label>
+    </div>
+    <div id="flopBox">
+      <label for="flop">Training compute</label>
+      <input id="flop" inputmode="decimal" value="1e25" aria-describedby="flopHint">
+      <div class="chips" aria-label="Presets">
+        <button type="button" class="chip" data-flop="1e24">10²⁴</button>
+        <button type="button" class="chip" data-flop="1e25">10²⁵ (EU AI Act)</button>
+        <button type="button" class="chip" data-flop="3.8e25">Llama 3.1 405B</button>
+        <button type="button" class="chip" data-flop="1e26">10²⁶</button>
+      </div>
+      <p class="hint" id="flopHint">Converted to H100-hours using model FLOP utilisation 30–50%.</p>
+    </div>
+    <div id="gpuBox" hidden>
+      <label for="gpuh">Measured accelerator-hours</label>
+      <input id="gpuh" inputmode="decimal" placeholder="e.g. 2000000">
+      <p class="hint">Uses your hours directly; IT power per GPU 0.85–1.30 kW.</p>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Cooling</legend>
+    <label for="arch">Facility cooling design</label>
+    <select id="arch">
+      <option value="evaporative">Air cooling + cooling tower (uses water)</option>
+      <option value="dry">Air cooling + dry cooler (no water)</option>
+      <option value="dtc_dry">Direct-to-chip liquid + dry cooler (no water)</option>
+    </select>
+    <div class="row">
+      <div><label for="year">Weather and grid year</label>
+        <select id="year"></select></div>
+      <div><label for="diesel">On-site diesel</label>
+        <select id="diesel"><option value="0">None</option><option value="0.1">10%</option><option value="0.25">25%</option><option value="0.5">50%</option></select></div>
+    </div>
+    <p class="hint">Diesel applies to every location; use it for weak-grid sites.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Locations</legend>
+    <div class="chips" id="refs" aria-label="Reference locations"></div>
+    <details>
+      <summary>Add any location</summary>
+      <div class="add">
+        <div class="full"><label for="nName">Name</label><input id="nName" placeholder="Nairobi"></div>
+        <div><label for="nLat">Latitude</label><input id="nLat" inputmode="decimal" placeholder="-1.29"></div>
+        <div><label for="nLon">Longitude</label><input id="nLon" inputmode="decimal" placeholder="36.82"></div>
+        <div class="full"><label for="nCountry">Country (for grid intensity)</label><select id="nCountry"><option value="">Loading…</option></select></div>
+        <div class="full"><button type="button" class="btn2" id="addLoc">Add location</button></div>
+      </div>
+    </details>
+    <ul class="loclist" id="locs" aria-live="polite"></ul>
+    <p class="hint">Up to 6. The first one is the reference for comparisons.</p>
+  </fieldset>
+
+  <button class="btn" id="go" type="submit">Estimate footprint</button>
+</form>
+
+<section class="out" id="out" aria-live="polite">
+  <div class="empty">
+    <h2>Pick a run size and two or more places</h2>
+    <p>You will get emissions and on-site water with 95% ranges, the probability that each place beats your reference, and how much of the difference comes from the power grid versus the climate.</p>
+    <p>Try the defaults: a 10²⁵-FLOP run in Oslo, Ashburn and Lagos.</p>
+  </div>
+</section>
+</div>
+
+<footer>
+  SiteFootprint is open-source research software. Weather: Open-Meteo historical archive (ERA5-based). Grid intensity: Ember via Our World in Data.
+  Facility model calibrated on 7 Google campuses and tested on 7 hold-out campuses; IT-energy model validated against Meta's Llama 3.1 405B disclosure.
+</footer>
+</div>
+
+<script>
+const REF = {Oslo:[59.91,10.75,"Norway"],Paris:[48.86,2.35,"France"],Ashburn:[39.04,-77.49,"United States"],
+             Beijing:[39.90,116.40,"China"],Marrakech:[31.63,-8.01,"Morocco"],Lagos:[6.52,3.38,"Nigeria"]};
+let locs = [{name:"Oslo",ref:true},{name:"Ashburn",ref:true},{name:"Lagos",ref:true}];
+let last = null;
+const $ = s => document.querySelector(s);
+
+// years
+for (let y = 2025; y >= 2010; y--) $("#year").insertAdjacentHTML("beforeend", `<option ${y===2024?"selected":""}>${y}</option>`);
+
+// mode toggle
+document.querySelectorAll('input[name=mode]').forEach(r => r.addEventListener("change", () => {
+  const g = $('input[name=mode]:checked').value === "gpuh";
+  $("#gpuBox").hidden = !g; $("#flopBox").hidden = g;
+}));
+document.querySelectorAll("[data-flop]").forEach(b => b.addEventListener("click", () => { $("#flop").value = b.dataset.flop; }));
+
+function renderRefs(){
+  $("#refs").innerHTML = Object.keys(REF).map(n => {
+    const on = locs.some(l => l.name === n);
+    return `<button type="button" class="chip" aria-pressed="${on}" data-ref="${n}">${n}</button>`;
+  }).join("");
+  document.querySelectorAll("[data-ref]").forEach(b => b.addEventListener("click", () => {
+    const n = b.dataset.ref, i = locs.findIndex(l => l.name === n);
+    if (i >= 0) locs.splice(i, 1); else if (locs.length < 6) locs.push({name:n, ref:true});
+    renderLocs();
+  }));
+}
+function renderLocs(){
+  $("#locs").innerHTML = locs.map((l, i) => {
+    const c = l.ref ? REF[l.name][2] : l.country;
+    return `<li><span>${esc(l.name)} <small>${i===0?"reference · ":""}${esc(c)}</small></span><button type="button" data-rm="${i}" aria-label="Remove ${esc(l.name)}">Remove</button></li>`;
+  }).join("");
+  document.querySelectorAll("[data-rm]").forEach(b => b.addEventListener("click", () => { locs.splice(+b.dataset.rm, 1); renderLocs(); }));
+  renderRefs();
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+fetch("/api/footprint?countries=1").then(r => r.json()).then(d => {
+  $("#nCountry").innerHTML = `<option value="">Choose a country</option>` + d.countries.map(c => `<option>${esc(c)}</option>`).join("");
+}).catch(() => { $("#nCountry").innerHTML = `<option value="">Country list unavailable</option>`; });
+
+$("#addLoc").addEventListener("click", () => {
+  const name = $("#nName").value.trim(), lat = parseFloat($("#nLat").value), lon = parseFloat($("#nLon").value), country = $("#nCountry").value;
+  if (!name || isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180 || !country)
+    return showErr("Add a name, a latitude between −90 and 90, a longitude between −180 and 180, and a country.");
+  if (locs.length >= 6) return showErr("Remove a location first: the limit is 6.");
+  locs.push({name, lat, lon, country}); ["#nName","#nLat","#nLon"].forEach(s => $(s).value = ""); renderLocs();
+});
+
+function showErr(m){
+  const e = document.querySelector(".err"); if (e) e.remove();
+  $("#out").insertAdjacentHTML("afterbegin", `<div class="err" role="alert">${esc(m)}</div>`);
+}
+
+$("#f").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if (!locs.length) return showErr("Add at least one location.");
+  const gpu = $('input[name=mode]:checked').value === "gpuh";
+  const body = {
+    arch: $("#arch").value, years: [+$("#year").value], diesel_share: +$("#diesel").value, n_draws: 500,
+    locations: locs.map(l => l.ref ? l.name : {name:l.name, lat:l.lat, lon:l.lon, country:l.country})
+  };
+  const v = parseFloat(gpu ? $("#gpuh").value : $("#flop").value);
+  if (!(v > 0)) return showErr(gpu ? "Enter accelerator-hours greater than zero." : "Enter training compute in FLOP, for example 1e25.");
+  if (gpu) body.gpu_hours = v; else body.flop = v;
+  const btn = $("#go"); btn.disabled = true; btn.textContent = `Fetching hourly weather for ${locs.length} location${locs.length>1?"s":""}…`;
+  try {
+    const r = await fetch("/api/footprint", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || `Request failed (${r.status})`);
+    last = d; render(d);
+  } catch (e) { showErr(e.message); }
+  finally { btn.disabled = false; btn.textContent = "Estimate footprint"; }
+});
+
+const f0 = (x, d=0) => Number(x).toLocaleString("en-US", {maximumFractionDigits:d, minimumFractionDigits:d});
+function colour(g){ // grid intensity -> clean/mid/dirty
+  const t = Math.min(1, Math.max(0, Math.log(Math.max(g,5)/20) / Math.log(700/20)));
+  const a = t < .5 ? ["#1F7A6E","#B8791B",t*2] : ["#B8791B","#9A3B26",(t-.5)*2];
+  const h = x => parseInt(x,16), c1 = a[0].slice(1), c2 = a[1].slice(1);
+  const m = i => Math.round(h(c1.substr(i,2)) + (h(c2.substr(i,2)) - h(c1.substr(i,2))) * a[2]);
+  return `rgb(${m(0)},${m(2)},${m(4)})`;
+}
+
+function ruler(d){
+  const s = [...d.sites].sort((a,b) => a.co2_t.median - b.co2_t.median);
+  const lo = Math.min(...s.map(x => x.co2_t.lo)), hi = Math.max(...s.map(x => x.co2_t.hi));
+  const a = Math.floor(Math.log10(lo)), b = Math.ceil(Math.log10(hi));
+  const W = Math.round(Math.min(760, Math.max(320, ($("#out").clientWidth || 760) - 34)));
+  const narrow = W < 520, L = narrow ? 84 : 120, R = narrow ? 58 : 70, rowH = 34, H = s.length * rowH + 38;
+  const x = v => L + (Math.log10(v) - a) / (b - a) * (W - L - R);
+  let g = "";
+  for (let e = a; e <= b; e++) for (const m of [1,2,5]) {
+    const v = m * 10 ** e; if (v < 10 ** a || v > 10 ** b) continue;
+    g += `<line x1="${x(v)}" x2="${x(v)}" y1="8" y2="${H-24}" stroke="#D5DDDA" stroke-width="${m===1?1:.5}"/>`;
+    if (m === 1 || (!narrow && (b - a) <= 2)) g += `<text x="${x(v)}" y="${H-8}" text-anchor="middle" font-size="11" fill="#5B6B73">${f0(v)}</text>`;
+  }
+  s.forEach((t, i) => {
+    const y = 20 + i * rowH, c = colour(t.grid_g_per_kwh);
+    g += `<text x="${L-10}" y="${y+4}" text-anchor="end" font-size="13" fill="#17252E">${esc(t.name)}</text>
+      <line x1="${x(t.co2_t.lo)}" x2="${x(t.co2_t.hi)}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+      <circle cx="${x(t.co2_t.median)}" cy="${y}" r="6.5" fill="${c}"/>
+      <text x="${x(t.co2_t.hi)+8}" y="${y+4}" font-size="12.5" fill="#17252E">${f0(t.co2_t.median)} t</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Emissions by location on a logarithmic scale">${g}</svg>`;
+}
+
+function render(d){
+  const s = [...d.sites].sort((a,b) => a.co2_t.median - b.co2_t.median);
+  const best = s[0], worst = s[s.length-1], ref = d.inputs.reference;
+  const ratio = worst.co2_t.median / best.co2_t.median;
+  const e = d.it_energy_kwh;
+  const rows = s.map(t => {
+    const p = t.prob_lower_than_reference, gs = t.vs_reference.grid_share;
+    return `<tr><td>${esc(t.name)}</td><td>${f0(t.grid_g_per_kwh)}</td><td>${f0(t.pue.median,3)}</td>
+      <td>${f0(t.wue_l_per_kwh_it.median,2)}</td><td>${f0(t.co2_t.median)}</td><td>${f0(t.co2_t.lo)}–${f0(t.co2_t.hi)}</td>
+      <td>${f0(t.water_m3.median)}</td><td>${p===null?"reference":f0(p*100)+"%"}</td><td>${gs===null?"–":f0(gs*100)+"%"}</td></tr>`;
+  }).join("");
+  const [mant, ex] = Number(d.inputs.flop || 0).toExponential(1).split("e+");
+  const run = d.inputs.flop ? `${mant} × 10<sup>${ex}</sup> FLOP` : `${f0(d.inputs.gpu_hours)} GPU-hours`;
+  $("#out").innerHTML = `<div class="fade">
+    <p class="summary">${esc(best.name)} emits ${f0(best.co2_t.median)} t CO₂e for this run; ${esc(worst.name)} emits ${f0(worst.co2_t.median)} t, ${ratio >= 1.95 ? f0(ratio,0)+" times as much" : f0((ratio-1)*100,0)+"% more"}.</p>
+    <p class="sub">${run} · ${f0(e.median/1e6,2)} GWh of IT energy (95%: ${f0(e.lo/1e6,2)}–${f0(e.hi/1e6,2)}) · ${esc(d.inputs.arch_label)} · ${d.inputs.years.join(", ")}</p>
+    <div class="ruler"><h3>Emissions on one scale</h3><p>Dots are medians, bars 95% ranges. Colour follows grid carbon intensity.</p>${ruler(d)}</div>
+    <div class="tbl"><h3>Details</h3><table>
+      <thead><tr><th>Location</th><th>Grid gCO₂e/kWh</th><th>PUE</th><th>WUE L/kWh</th><th>tCO₂e</th><th>95% range</th><th>Water m³</th><th>Lower than ${esc(ref)}</th><th>Grid share of difference</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      <p class="note">“Lower than ${esc(ref)}” is the share of ${d.inputs.n_draws} paired draws in which the location emits less. “Grid share” is the part of the log-difference from ${esc(ref)} explained by grid intensity rather than cooling. ${esc(d.validity_note)}</p>
+    </div>
+    <div class="actions"><button class="btn2" id="dl" type="button">Download results (JSON)</button><button class="btn2" id="cp" type="button">Copy citation</button></div>
+    <div class="cite"><h3 style="font:600 17px var(--serif);margin:0">Cite this tool</h3><pre id="bib">${esc(bib(d.version))}</pre></div>
+  </div>`;
+  $("#dl").addEventListener("click", () => {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(last,null,2)],{type:"application/json"}));
+    a.download = "sitefootprint_results.json"; a.click();
+  });
+  $("#cp").addEventListener("click", async () => { try { await navigator.clipboard.writeText($("#bib").textContent); $("#cp").textContent = "Citation copied"; } catch { $("#cp").textContent = "Select the text below to copy"; } });
+}
+function bib(v){
+  return `@software{adekunle_sitefootprint,
+  author  = {Adekunle, Adeyori},
+  title   = {SiteFootprint: location-resolved carbon and water footprints of AI training},
+  version = {${v}},
+  year    = {2026},
+  url     = {https://github.com/[user]/sitefootprint},
+  doi     = {[Zenodo DOI]}
+}`;
+}
+renderLocs();
+</script>
+</body>
+</html>

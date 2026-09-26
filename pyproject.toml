@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sitefootprint"
+version = "0.1.0"
+description = "Location-resolved carbon and water footprints of AI training, with hourly climate-driven cooling and calibrated uncertainty"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Adeyori Adekunle"}]
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.24"]
+keywords = ["carbon footprint", "AI", "data centres", "PUE", "WUE", "machine learning", "sustainability"]
+classifiers = ["Programming Language :: Python :: 3", "License :: OSI Approved :: MIT License",
+               "Topic :: Scientific/Engineering", "Intended Audience :: Science/Research"]
+
+[project.optional-dependencies]
+siting = ["scipy>=1.9"]
+test = ["pytest>=7"]
+
+[project.scripts]
+sitefootprint = "sitefootprint.cli:main"
+
+[tool.setuptools]
+packages = ["sitefootprint"]
+
+[tool.setuptools.package-data]
+sitefootprint = ["data/*.json"]

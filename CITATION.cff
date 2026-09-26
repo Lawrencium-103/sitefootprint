@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use SiteFootprint, please cite it as below."
+title: "SiteFootprint: location-resolved carbon and water footprints of AI training"
+version: 0.1.0
+date-released: 2026-09-26
+license: MIT
+authors:
+  - family-names: Adekunle
+    given-names: Adeyori
+    affiliation: "Alabama A&M University"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+repository-code: "https://github.com/[user]/sitefootprint"
+doi: "10.5281/zenodo.[to-be-assigned]"
+keywords: [carbon footprint, artificial intelligence, data centres, PUE, water use]
